@@ -1,19 +1,21 @@
-# Mobile Linux Dotfiles
+# postmarketOS Mobile Linux Setup
 
-Custom mobile Linux environment built on:
+Custom mobile Linux environment built around:
 
 - postmarketOS
 - Sway
 - Waybar
 - Foot
 - Squeekboard
+- Wayland
 
 Focused on:
-- lightweight mobile UI
+- stability
 - reproducibility
 - rollback safety
-- clean Wayland workflow
-- git-managed configs
+- lightweight mobile UI
+- remote administration
+- backup/recovery workflows
 
 ---
 
@@ -21,33 +23,102 @@ Focused on:
 
 This setup prioritizes:
 
-- stability over endless tweaking
+- stable systems over endless tweaking
 - reproducibility over memorization
-- rollback capability
-- simple recovery
+- backups over panic recovery
 - understanding the Linux stack
+- minimal but practical tooling
 
 Main realization:
 
+> Minimal systems are not automatically simpler.
 > Stable boring systems are better than endlessly broken "perfect" setups.
 
 ---
 
-# System Overview
+# Device
 
-## Core Components
+- MSM8998-based phone
+- postmarketOS (Alpine-based)
+- Wayland/Sway setup
+- Remote SSH administration enabled
+- Tailscale enabled
+
+---
+
+# Core Components
 
 | Component | Purpose |
 |---|---|
 | Sway | Wayland compositor |
-| Waybar | Top status bar |
+| Waybar | Status bar |
 | Foot | Terminal emulator |
-| Wofi | App launcher |
+| Wofi | Launcher |
 | Squeekboard | Virtual keyboard |
 | brightnessctl | Brightness control |
 | YAD | Popup UI dialogs |
-| swayidle | Idle management |
+| swayidle | Idle handling |
 | acpid | Power button handling |
+| rsync | Incremental backups |
+| git | Dotfile/version control |
+| fastfetch | System info display |
+
+---
+
+# System Features
+
+Working:
+
+- Touchscreen
+- Wayland graphics
+- Mobile scaling
+- Waybar
+- Squeekboard
+- Brightness popup
+- Power button handling
+- Auto-start Sway
+- SSH access
+- Tailscale remote access
+- Git-managed configs
+- Symlinked dotfiles
+- Incremental backup workflow
+
+---
+
+# Dotfiles Architecture
+
+This repository uses symlink-based dotfiles.
+
+Meaning:
+
+```text
+~/.config/sway
+```
+
+is actually a symlink to:
+
+```text
+~/dotfiles/sway
+```
+
+Applications use:
+
+```text
+~/.config
+```
+
+Git tracks:
+
+```text
+~/dotfiles
+```
+
+Both point to the same files.
+
+Result:
+- no manual syncing
+- instant git tracking
+- clean rollback/history
 
 ---
 
@@ -67,31 +138,6 @@ dotfiles/
 
 ---
 
-# Dotfiles Workflow
-
-This repository uses symlinked configs.
-
-Meaning:
-
-```text
-~/.config/sway
-```
-
-is a symbolic link to:
-
-```text
-~/dotfiles/sway
-```
-
-So:
-- applications read from ~/.config
-- git tracks files in ~/dotfiles
-- both are actually the same files
-
-This eliminates manual syncing.
-
----
-
 # Checking Symlinks
 
 Verify:
@@ -100,7 +146,7 @@ Verify:
 ls -l ~/.config
 ```
 
-Correct output looks like:
+Correct output:
 
 ```text
 sway -> /home/USER/dotfiles/sway
@@ -117,46 +163,88 @@ then it is a symbolic link.
 
 ---
 
-# Initial Installation
+# Git Workflow
 
-## Install Packages
+## Check Changes
 
 ```sh
-sudo apk add \
-sway \
-waybar \
-foot \
-wofi \
-brightnessctl \
-yad \
-swayidle \
-squeekboard \
-acpid \
-git
+git status
 ```
 
 ---
 
-# Clone Repository
+## See Exact Differences
 
 ```sh
-git clone YOUR_REPO_URL ~/dotfiles
+git diff
 ```
 
 ---
 
-# Create Config Symlinks
-
-## Sway
+## Save Changes
 
 ```sh
-ln -s ~/dotfiles/sway ~/.config/sway
+git add .
+git commit -m "Describe changes"
+git push origin main
 ```
 
-## Waybar
+Example:
 
 ```sh
-ln -s ~/dotfiles/waybar ~/.config/waybar
+git commit -m "Improve waybar battery script"
+```
+
+---
+
+# Recommended Workflow
+
+```text
+edit
+→ test
+→ reload
+→ git diff
+→ commit
+→ push
+```
+
+Never blindly commit broken configs.
+
+---
+
+# Sway Reload
+
+Reload Sway config:
+
+```sh
+swaymsg reload
+```
+
+---
+
+# Restart Waybar
+
+```sh
+pkill waybar && waybar &
+```
+
+---
+
+# Foot + Fastfetch Setup
+
+Foot automatically launches Fastfetch.
+
+Example configuration:
+
+```ini
+[main]
+shell=/bin/ash -lc "fastfetch; exec ash"
+```
+
+Location:
+
+```text
+~/.config/foot/foot.ini
 ```
 
 ---
@@ -175,27 +263,27 @@ if [ -z "$WAYLAND_DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
 fi
 ```
 
-Result:
-- tty1 launches Sway automatically
-- if Sway crashes → console still usable
+Behavior:
+- tty1 automatically launches Sway
+- if Sway crashes → fallback console still works
 
 ---
 
-# ACPID Setup
+# ACPID Power Button Setup
 
-## Install service file
+Install service:
 
 ```sh
 sudo cp system/acpid.service /etc/systemd/system/
 ```
 
-## Install handler
+Install handler:
 
 ```sh
 sudo cp system/handler.sh /etc/acpi/
 ```
 
-## Enable service
+Enable:
 
 ```sh
 sudo systemctl daemon-reload
@@ -207,19 +295,53 @@ sudo systemctl restart acpid
 
 # Power Button Design
 
-This setup does NOT use real suspend.
+This setup avoids real suspend.
 
 Reason:
 - suspend unstable on MSM8998
 - GPU resume issues
-- touch resume issues
+- touchscreen resume issues
 - compositor instability
 
 Instead:
 - screen DPMS off
 - compositor remains alive
 - instant wake
-- applications remain running
+- apps stay running
+
+---
+
+# Wayland Environment Variables
+
+Recommended Sway environment setup:
+
+```text
+setenv XDG_SESSION_TYPE wayland
+setenv XDG_CURRENT_DESKTOP sway
+setenv MOZ_ENABLE_WAYLAND 1
+setenv QT_QPA_PLATFORM wayland
+setenv GDK_BACKEND wayland
+```
+
+Improves native Wayland support and suppresses many X11 warnings.
+
+---
+
+# Tailscale Notes
+
+Tailscale may overwrite:
+
+```text
+/etc/resolv.conf
+```
+
+This can break DNS resolution.
+
+Disable Tailscale DNS management:
+
+```sh
+sudo tailscale set --accept-dns=false
+```
 
 ---
 
@@ -228,7 +350,7 @@ Instead:
 Save installed packages:
 
 ```sh
-apk info -vv | sort > packages.txt
+apk info -vv | sort > ~/dotfiles/packages.txt
 ```
 
 Restore packages:
@@ -239,159 +361,217 @@ sudo apk add $(cat packages.txt)
 
 ---
 
-# Git Workflow
+# Backup Strategy
 
-## See Changed Files
+This setup uses layered backups.
+
+| Backup Type | Purpose |
+|---|---|
+| Git dotfiles | Config rollback |
+| packages.txt | Reinstall packages |
+| rsync home backup | Weekly recovery |
+| Raw image | Disaster recovery |
+
+---
+
+# Weekly Backup Workflow
+
+Uses:
+
+- SSH
+- rsync
+- PC as backup target
+
+---
+
+# Install rsync
 
 ```sh
-git status
+sudo apk add rsync
 ```
 
 ---
 
-## See Exact Changes
+# Backup Dotfiles
+
+From PC:
 
 ```sh
-git diff
+rsync -avz \
+kuntal@PHONE_IP:/home/kuntal/dotfiles/ \
+~/pmos-backups/dotfiles/
 ```
 
 ---
 
-## Save Changes
+# Backup Entire Home
+
+Recommended:
 
 ```sh
-git add .
-git commit -m "Describe changes"
-git push
+rsync -avz \
+--exclude='.cache' \
+--exclude='Downloads' \
+--exclude='.local/share/Trash' \
+kuntal@PHONE_IP:/home/kuntal/ \
+~/pmos-backups/home/
 ```
+
+---
+
+# Automatic Backup Script
 
 Example:
 
 ```sh
-git commit -m "Improve brightness popup"
+#!/bin/sh
+
+DATE=$(date +%F)
+
+mkdir -p ~/pmos-backups/$DATE
+
+rsync -avz \
+--exclude='.cache' \
+--exclude='Downloads' \
+kuntal@PHONE_IP:/home/kuntal/ \
+~/pmos-backups/$DATE/home/
+
+echo "Backup complete: $DATE"
 ```
 
 ---
 
-# Safe Workflow
+# SSH Key Setup
 
-Recommended workflow:
+Generate key on PC:
+
+```sh
+ssh-keygen
+```
+
+Copy to phone:
+
+```sh
+ssh-copy-id kuntal@PHONE_IP
+```
+
+Allows passwordless backups.
+
+---
+
+# Automated Weekly Backups
+
+Example cron job:
+
+```cron
+0 3 * * 0 /home/YOURUSER/backup-pmos.sh
+```
+
+Meaning:
+- every Sunday
+- 3 AM
+- automatic backup
+
+---
+
+# Restore Workflow
+
+## Reinstall Base PMOS
+
+Flash/reinstall postmarketOS normally.
+
+---
+
+## Restore Home Directory
+
+```sh
+rsync -av \
+~/pmos-backups/latest/home/ \
+kuntal@PHONE_IP:/home/kuntal/
+```
+
+---
+
+## Restore Packages
+
+```sh
+sudo apk add $(cat packages.txt)
+```
+
+---
+
+## Recreate Symlinks
+
+Example:
+
+```sh
+ln -s ~/dotfiles/sway ~/.config/sway
+ln -s ~/dotfiles/waybar ~/.config/waybar
+```
+
+---
+
+# Raw Image Backups
+
+Used only before dangerous experiments.
+
+Main storage device:
 
 ```text
-edit
-→ test
-→ reload
-→ git diff
-→ commit
-→ push
+/dev/sda
 ```
 
-NEVER:
-- blindly commit untested configs
-- tweak endlessly without rollback
-
----
-
-# Reloading Sway
-
-Reload config:
+Create image:
 
 ```sh
-swaymsg reload
-```
-
----
-
-# Restarting Waybar
-
-```sh
-pkill waybar && waybar &
-```
-
----
-
-# Rollback
-
-## View History
-
-```sh
-git log --oneline
-```
-
----
-
-## Restore Older File
-
-Example:
-
-```sh
-git checkout HEAD~1 -- waybar/config.jsonc
-```
-
----
-
-# Full System Backup
-
-## Create Raw Image
-
-Example:
-
-```sh
-sudo dd if=/dev/mmcblk0 of=pmos.img bs=4M status=progress
-```
-
-Compress:
-
-```sh
-xz -T0 pmos.img
-```
-
----
-
-# Restore Raw Image
-
-```sh
-sudo dd if=pmos.img of=/dev/mmcblk0 bs=4M status=progress
+ssh kuntal@PHONE_IP \
+"sudo dd if=/dev/sda bs=4M status=progress" \
+| gzip > pmos-full.img.gz
 ```
 
 WARNING:
-- restores ENTIRE device
-- destroys current filesystem
+- full-device backup
+- device-specific
+- dangerous to restore blindly
 
 ---
 
 # Important Lessons Learned
 
 - GPU/display stack affects everything above it
-- logs are not always fatal
-- minimal systems require MORE integration work
-- desktop environments solve many hidden problems
-- reproducibility matters more than customization
+- Logs are not always fatal
+- Minimal systems require more integration work
+- Desktop environments solve many hidden problems
+- Reproducibility matters more than customization
+- Backups matter more than tweaking
 
 ---
 
 # Future Ideas
 
+- Jellyfin direct-play server
+- Self-hosted services
+- Immutable Linux setups
 - btrfs snapshots
-- immutable systems
 - Nix-style reproducibility
-- self-hosted sync
-- mobile Wayland optimization
-- containerized services
-- automated backups
+- Containerized services
+- Waybar VPN indicators
+- Automated snapshot rotation
 
 ---
 
 # Notes
 
-This repository is both:
-- a backup system
-- a learning journal
+This repository acts as:
 
-The goal is not endless tweaking.
+- system backup
+- recovery documentation
+- learning journal
+- reproducible environment
+- rollback mechanism
 
-The goal is:
-- understanding
-- reproducibility
-- stability
-- recoverability
+Goal:
+- understand systems deeply
+- maintain stability
+- recover quickly
+- experiment safely
