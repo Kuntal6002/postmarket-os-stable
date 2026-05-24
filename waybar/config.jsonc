@@ -35,15 +35,8 @@
     },
 
     "battery": {
-        "bat": "bq27411-0",
-        "format": "{icon} {capacity}%",
-        "format-charging": "⚡ {capacity}%",
-        "format-icons": ["▁", "▂", "▄", "▆", "█"],
-        "interval": 30,
-        "states": {
-            "warning": 30,
-            "critical": 15
-        },
+        "exec":"~/.config/waybar/battery.sh",
+        "interval":10,
         "tooltip": false
     },
 

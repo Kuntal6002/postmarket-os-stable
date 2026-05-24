@@ -1,0 +1,6 @@
+*.log
+*.sock
+*.cache
+*.swp
+id_rsa
+known_hosts
