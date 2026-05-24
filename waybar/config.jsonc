@@ -8,7 +8,7 @@
     "margin-right": 8,
 
     "modules-left": ["clock"],
-    "modules-right": ["custom/bright-up", "custom/bright-down","battery","network"],
+    "modules-right": ["custom/bright-up", "custom/bright-down","custom/battery","network"],
 
     "clock": {
         "format": "{:%H:%M}",
@@ -34,8 +34,8 @@
         "tooltip": false
     },
 
-    "battery": {
-        "exec":"~/.config/waybar/battery.sh",
+    "custom/battery": {
+        "exec":"sh ~/.config/waybar/battery.sh",
         "interval":10,
         "tooltip": false
     },

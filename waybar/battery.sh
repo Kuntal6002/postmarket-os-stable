@@ -2,10 +2,8 @@
 cap=$(cat /sys/class/power_supply/bq27411-0/capacity)
 status=$(cat /sys/class/power_supply/bq27411-0/status)
 
-if [ "$cap" -gt 95 ] && [ "$status" = "Charging" ]; then
-    cap=$(awk -v now=$(cat /sys/class/power_supply/bq27411-0/charge_now) \
-              -v design=$(cat /sys/class/power_supply/bq27411-0/charge_full_design) \
-              'BEGIN {printf "%d", (now/design)*100}')
+if [ "$status" = "Charging" ] && [ "$cap" -eq 100 ]; then
+    cap=$(upower -i /org/freedesktop/UPower/devices/battery_bq27411_0 | awk '/percentage/{gsub("%","",$2); print int($2)}')
 fi
 
 if [ "$status" = "Charging" ]; then
