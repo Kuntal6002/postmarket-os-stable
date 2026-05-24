@@ -1,0 +1,68 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 34,
+    "spacing": 4,
+    "margin-top": 4,
+    "margin-left": 8,
+    "margin-right": 8,
+
+    "modules-left": ["clock"],
+    "modules-right": ["custom/bright-up", "custom/bright-down","battery","network"],
+
+    "clock": {
+        "format": "{:%H:%M}",
+        "format-alt": "{:%a, %d %b}",
+        "tooltip": false
+    },
+
+    "backlight": {
+        "device": "c994000.dsi.0",
+        "format": "☀ {percent}%",
+        "tooltip": false
+    },
+
+    "custom/bright-up": {
+        "format": "🔆",
+        "on-click": "brightnessctl set +10%",
+        "tooltip": false
+    },
+
+    "custom/bright-down": {
+        "format": "🔅",
+        "on-click": "brightnessctl set 10%-",
+        "tooltip": false
+    },
+
+    "battery": {
+        "bat": "bq27411-0",
+        "format": "{icon} {capacity}%",
+        "format-charging": "⚡ {capacity}%",
+        "format-icons": ["▁", "▂", "▄", "▆", "█"],
+        "interval": 30,
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "tooltip": false
+    },
+
+    "network": {
+        "format-wifi": "🛜",
+        "format-disconnected": "🚫",
+        "tooltip": false
+    },
+
+    "custom/reboot": {
+        "format": "↺",
+        "on-click": "doas reboot",
+        "tooltip": false
+    },
+
+    "custom/poweroff": {
+        "format": "⏻",
+        "on-click": "swaynag -t warning -m 'Reboot?' -b 'Yes' 'doas reboot'",
+        "tooltip": false
+    }
+
+}

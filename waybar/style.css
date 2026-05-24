@@ -1,0 +1,116 @@
+* {
+    border: none;
+    border-radius: 0;
+    font-family: monospace;
+    font-size: 13px;
+    min-height: 0;
+}
+
+window#waybar {
+    background: rgba(10, 10, 10, 0.88);
+    color: #e0e0e0;
+}
+
+/* Base module styling */
+.modules-left,
+.modules-right {
+    padding: 0 6px;
+}
+
+#clock {
+    color: #e0e0e0;
+    padding: 0 10px;
+    letter-spacing: 0.05em;
+}
+
+#battery {
+    padding: 0 10px;
+    color: #e0e0e0;
+}
+
+#battery.charging {
+    color: #a8e6a3;
+}
+
+#battery.warning {
+    color: #f0c060;
+}
+
+#battery.critical {
+    color: #e06060;
+    animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+    50% { color: transparent; }
+}
+
+#backlight {
+    padding: 0 10px;
+    color: #e0e0e0;
+}
+
+#network {
+    padding: 0 10px;
+    color: #e0e0e0;
+}
+
+#network.disconnected {
+    color: #e06060;
+}
+
+/* Brightness buttons — big, tappable */
+#custom-bright-up,
+#custom-bright-down {
+    font-size: 18px;
+    padding: 0 14px;
+    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    margin: 4px 2px;
+    min-width: 36px;
+}
+
+#custom-bright-up:hover,
+#custom-bright-down:hover,
+#custom-bright-up:active,
+#custom-bright-down:active {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+#custom-reboot,
+#custom-poweroff {
+    font-size: 18px;
+    padding: 0 14px;
+    border-radius: 6px;
+    margin: 4px 2px;
+    min-width: 36px;
+}
+
+#custom-reboot {
+    color: #f0c060;
+    background: rgba(240, 192, 96, 0.08);
+}
+
+#custom-poweroff {
+    color: #e06060;
+    background: rgba(224, 96, 96, 0.08);
+}
+
+#custom-reboot:active,
+#custom-poweroff:active {
+    background: rgba(255, 255, 255, 0.15);
+}
+#custom-brightness {
+    font-size: 13px;
+    padding: 0 14px;
+    color: #e0e0e0;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    margin: 4px 2px;
+    min-width: 52px;
+}
+
+#custom-brightness:active {
+    background: rgba(255, 255, 255, 0.15);
+}

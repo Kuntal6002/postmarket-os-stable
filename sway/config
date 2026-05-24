@@ -1,0 +1,30 @@
+set $mod Mod4
+
+set $term foot
+set $menu "wofi --show drun"
+
+output DSI-1 scale 3
+
+default_border none
+gaps inner 0
+gaps outer 0
+
+bindsym $mod+Return exec $term
+bindsym $mod+d exec $menu
+
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+q kill
+
+bindsym XF86MonBrightnessUp exec brightnessctl set +5%
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+
+bindsym Print exec grim
+
+exec foot
+exec squeekboard
+exec waybar
+exec swayidle -w \
+ timeout 120 'swaymsg "output * power off"' \
+ resume 'swaymsg "output * power on"'
+
+include /etc/sway/config.d/*
